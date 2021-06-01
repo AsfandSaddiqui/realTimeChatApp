@@ -15,6 +15,7 @@ const colors = require("colors");
 const cookieParser = require('cookie-parser');
 const connectDB = require("./controllers/db");
 const debug = require('debug')('http');
+
 const formatMessage = require('./utils/messages');
 const {
   userJoin,
@@ -27,7 +28,6 @@ const fs = require('fs');
 const util = require('util');
 let exec_prom = util.promisify(exec);
 const app = express();
-const server = http.createServer(app);
 const botName = "COVID-19 Utility Bot";
 const logger = require("./middleware/logger");
 const Chat = require('./models/Chat');
@@ -49,6 +49,8 @@ const prediction = require('./routes/prediction');
 const conversation = require('./routes/conversation');
 const message = require('./routes/message');
 
+var server = require('http').createServer(app);  
+var io = require('socket.io')(server);
 
 // load env vars
 dotenv.config({
@@ -78,11 +80,8 @@ app.use(cors());
 
 // Chat Module
 
-const io = require("socket.io")(8900, {
-  cors: {
-    origin: "http://localhost:3000",
-  },
-});
+
+
 
 let users = [];
 
@@ -100,31 +99,42 @@ const getUser = (userId) => {
 };
 
 io.on("connection", (socket) => {
-  //when ceonnect
+  //when connect
   console.log("a user connected.");
 
   //take userId and socketId from user
   socket.on("addUser", (userId) => {
+    console.log("i a from server")
     addUser(userId, socket.id);
     io.emit("getUsers", users);
   });
 
   //send and get message
   socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+    
     const user = getUser(receiverId);
+    if(user!= undefined){
+      console.log("hhehe")
     io.to(user.socketId).emit("getMessage", {
       senderId,
       text,
-    });
+    });}
   });
 
-  //when disconnect
+  // when disconnect
   socket.on("disconnect", () => {
     console.log("a user disconnected!");
     removeUser(socket.id);
     io.emit("getUsers", users);
   });
 });
+
+
+
+
+
+
+
 // COVID-19 API
 // var worldWideCases;
 // var worldWideTodayCases;
@@ -181,6 +191,10 @@ app.get('/register', function (req, res) {
 
 app.get('/chat-dashboard', function (req, res) {
   res.render('chatDashboard');
+});
+
+app.get('/chat-doctor', function (req, res) {
+  res.render('doctorChat');
 });
 
 app.get('/registerDoctor', function (req, res) {

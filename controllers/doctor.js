@@ -166,6 +166,8 @@ exports.getMe = asyncHandler(async (req, res, next) => {
     });
 });
 
+
+
 // @desc Update user details
 // @route PUT /auth/updateDetails
 // @access Private

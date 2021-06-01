@@ -427,7 +427,7 @@ body {
   }
 }
 #frame #sidepanel #contacts ul li.contact:hover {
-  background: #32465a;
+  background: #3159e6;
 }
 #frame #sidepanel #contacts ul li.contact.active {
   background: #6d99ff;
